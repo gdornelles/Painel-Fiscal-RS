@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Fiscal RS · Relatório de Transparência Fiscal · 2019–2025</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=PT+Sans:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --paper:#f1ecdf;
+  --paper-2:#ebe4d1;
+  --paper-3:#e4dcc4;
+  --ink:#1c1814;
+  --ink-2:#4a4239;
+  --muted:#857a68;
+  --rule:#c4b8a1;
+  --rule-soft:#d6cdb8;
+  --green:#3a6b3e;
+  --gold:#a37714;
+  --red:#92302a;
+  --steel:#2f4e74;
+  --gridline:rgba(28,24,20,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--paper);color:var(--ink);font-family:'PT Sans',sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.serif{font-family:'Spectral',serif}
+.mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+
+/* ========================================
+   LAYOUT GERAL
+   ======================================== */
+.page{max-width:1320px;margin:0 auto;padding:0 36px}
+@media (max-width:760px){ .page{padding:0 20px} }
+
+/* ========================================
+   MASTHEAD
+   ======================================== */
+.masthead{padding:22px 0 14px}
+.kicker{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-2);font-weight:700}
+.kicker .sep{margin:0 .6em;color:var(--rule)}
+.masthead-row{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-top:10px;padding-top:10px;padding-bottom:6px;border-top:1px solid var(--rule);border-bottom:3px double var(--ink);flex-wrap:wrap}
+.title{font-family:'Spectral',serif;font-weight:600;font-size:clamp(40px,6vw,68px);line-height:.95;letter-spacing:-.012em}
+.edition{text-align:right;font-family:'Spectral',serif;font-size:13px;font-style:italic;color:var(--ink-2);line-height:1.55;max-width:340px}
+.edition .ed-line{display:block}
+.edition .ed-em{font-style:normal;font-weight:500;color:var(--ink)}
+
+/* ========================================
+   BARRA DE CONTROLES
+   ======================================== */
+.controls{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;padding:14px 0 10px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.years-label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;display:block}
+.years{display:flex;gap:2px;flex-wrap:wrap;align-items:baseline}
+.year{background:none;border:none;cursor:pointer;padding:4px 12px;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;color:var(--ink-2);transition:color .12s;letter-spacing:.01em;position:relative}
+.year:hover{color:var(--ink)}
+.year.active{color:var(--ink);font-weight:600;background:var(--ink);color:var(--paper);padding:4px 12px}
+.year+ .year{border-left:1px solid var(--rule-soft)}
+.year.active+ .year, .year+ .year.active{border-left:none}
+
+.status-line{display:flex;gap:22px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--ink-2)}
+.status-item{display:inline-flex;align-items:baseline;gap:7px;font-family:'PT Sans',sans-serif;white-space:nowrap}
+.status-item .sq{display:inline-block;width:9px;height:9px;flex-shrink:0;position:relative;top:1px}
+.sq-green{background:var(--green)}
+.sq-gold{background:var(--gold)}
+.sq-red{background:var(--red)}
+.sq-steel{background:var(--steel)}
+.status-item .st-label{color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.status-item .st-val{font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--ink)}
+
+/* ========================================
+   NAVEGAÇÃO SEÇÕES
+   ======================================== */
+nav.sections{display:flex;gap:0;padding:6px 0;border-bottom:1px solid var(--ink);overflow-x:auto;align-items:stretch}
+.sec-btn{background:none;border:none;cursor:pointer;padding:14px 18px 12px;font-family:'Spectral',serif;font-size:15px;color:var(--ink-2);white-space:nowrap;letter-spacing:0;position:relative;transition:color .12s}
+.sec-btn:hover{color:var(--ink)}
+.sec-btn.active{color:var(--ink);font-weight:600}
+.sec-btn.active::after{content:'';position:absolute;left:18px;right:18px;bottom:-1px;height:3px;background:var(--ink)}
+.sec-btn .sec-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-right:8px;font-weight:400;letter-spacing:.05em;position:relative;top:-1px}
+.sec-btn.active .sec-num{color:var(--ink)}
+
+/* ========================================
+   CONTEÚDO
+   ======================================== */
+main{padding:28px 0 80px}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+.section-head{margin:32px 0 16px}
+.section-head:first-child{margin-top:0}
+.section-eyebrow{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px}
+.section-title{font-family:'Spectral',serif;font-size:22px;font-weight:600;line-height:1.15;letter-spacing:-.005em}
+.section-deck{font-family:'Spectral',serif;font-style:italic;color:var(--ink-2);font-size:14px;margin-top:4px;line-height:1.5;max-width:60ch}
+
+/* ========================================
+   BLOCO DE INDICADORES (datum)
+   ======================================== */
+.datum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:2px solid var(--ink);border-bottom:1px solid var(--ink)}
+@media(max-width:900px){.datum-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.datum-grid{grid-template-columns:1fr}}
+
+.datum{padding:16px 18px 18px;border-right:1px solid var(--rule-soft);border-bottom:1px solid var(--rule-soft);position:relative}
+.datum:nth-child(4n){border-right:none}
+.datum:nth-last-child(-n+4){border-bottom:none}
+@media(max-width:900px){
+  .datum{border-right:1px solid var(--rule-soft);border-bottom:1px solid var(--rule-soft)}
+  .datum:nth-child(4n){border-right:1px solid var(--rule-soft)}
+  .datum:nth-child(2n){border-right:none}
+  .datum:nth-last-child(-n+4){border-bottom:1px solid var(--rule-soft)}
+  .datum:nth-last-child(-n+2){border-bottom:none}
+}
+@media(max-width:520px){
+  .datum{border-right:none !important;border-bottom:1px solid var(--rule-soft) !important}
+  .datum:last-child{border-bottom:none !important}
+}
+
+.datum-label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);font-weight:700;line-height:1.3;display:flex;align-items:center;gap:6px;margin-bottom:10px;min-height:28px}
+.datum-info{display:inline-block;font-size:11px;color:var(--muted);font-weight:400;font-family:'Spectral',serif;font-style:italic;cursor:help;position:relative;letter-spacing:0;text-transform:none;border:1px solid var(--rule);width:14px;height:14px;text-align:center;line-height:12px;border-radius:50%}
+.datum-info:hover .tip{display:block}
+.datum-value{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:500;line-height:1.05;letter-spacing:-.01em;margin-bottom:6px;font-variant-numeric:tabular-nums}
+.datum-value.pos{color:var(--green)}
+.datum-value.neg{color:var(--red)}
+.datum-value.gold{color:var(--gold)}
+.datum-value.steel{color:var(--steel)}
+.datum-value.ink{color:var(--ink)}
+.datum-sub{font-size:12px;color:var(--muted);font-family:'Spectral',serif;font-style:italic;line-height:1.4;margin-bottom:8px}
+.datum-status{font-size:11px;letter-spacing:.04em;color:var(--ink-2);display:inline-flex;align-items:center;gap:6px;font-weight:500}
+.datum-status .sq{display:inline-block;width:8px;height:8px}
+
+/* tooltip */
+.tip{display:none;position:absolute;bottom:calc(100% + 8px);left:0;background:var(--ink);color:var(--paper);padding:10px 12px;font-size:11.5px;font-family:'PT Sans',sans-serif;font-style:normal;line-height:1.5;width:260px;letter-spacing:0;z-index:50;text-transform:none;font-weight:400;text-align:left}
+
+/* ========================================
+   SEMÁFORO / LIMITES LEGAIS
+   ======================================== */
+.limits-block{border:1px solid var(--ink);background:var(--paper-2);padding:24px 28px;margin-top:24px}
+.limit-row{display:grid;grid-template-columns:240px 1fr 110px;gap:24px;align-items:center;padding:14px 0;border-bottom:1px solid var(--rule-soft)}
+.limit-row:last-child{border-bottom:none}
+.limit-name{font-family:'Spectral',serif;font-size:15px;color:var(--ink)}
+.limit-name .lim-cap{font-size:11px;color:var(--muted);font-family:'PT Sans',sans-serif;letter-spacing:.05em;display:block;margin-top:2px;text-transform:uppercase}
+.limit-bar{position:relative;height:14px;background:var(--paper-3);border:1px solid var(--rule)}
+.limit-fill{position:absolute;top:0;left:0;bottom:0;transition:width .5s ease}
+.limit-marker{position:absolute;top:-3px;height:20px;width:1px;background:var(--ink-2);transform:translateX(-50%)}
+.limit-marker::after{content:attr(data-label);position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--ink-2);white-space:nowrap;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;font-weight:500;background:var(--paper-2);padding:0 2px}
+.limit-marker.below::after{top:auto;bottom:-14px}
+.limit-val{text-align:right;font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
+@media(max-width:760px){.limit-row{grid-template-columns:1fr;gap:8px}.limit-val{text-align:left}}
+
+/* ========================================
+   GRÁFICOS
+   ======================================== */
+.chart-block{background:var(--paper);padding:20px 24px 24px;border:1px solid var(--rule);margin:0}
+.chart-head{margin-bottom:14px}
+.chart-eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:4px}
+.chart-title{font-family:'Spectral',serif;font-size:18px;font-weight:600;line-height:1.2}
+.chart-deck{font-family:'Spectral',serif;font-style:italic;font-size:13px;color:var(--ink-2);margin-top:3px;line-height:1.45}
+.chart-canvas{position:relative}
+.chart-source{font-size:10px;color:var(--muted);margin-top:10px;letter-spacing:.04em;padding-top:8px;border-top:1px dotted var(--rule)}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+@media(max-width:900px){.grid-2{grid-template-columns:1fr}}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px}
+@media(max-width:900px){.grid-3{grid-template-columns:1fr}}
+
+/* ========================================
+   NOTA / EXPLICAÇÃO
+   ======================================== */
+.editorial-note{background:var(--paper-2);border-left:3px solid var(--ink);padding:14px 18px;margin:18px 0;font-family:'Spectral',serif;font-size:14px;line-height:1.6;color:var(--ink-2)}
+.editorial-note .note-tag{display:block;font-family:'PT Sans',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px;font-style:normal}
+.editorial-note strong{color:var(--ink);font-weight:700}
+
+/* ========================================
+   TABELA
+   ======================================== */
+.table-wrap{overflow-x:auto;border:1px solid var(--ink);margin-top:16px}
+table.data-table{width:100%;border-collapse:collapse;font-size:13px;background:var(--paper)}
+table.data-table thead th{background:var(--ink);color:var(--paper);font-weight:600;padding:10px 12px;text-align:right;font-family:'PT Sans',sans-serif;font-size:11px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;border-bottom:none}
+table.data-table thead th:first-child{text-align:left}
+table.data-table tbody td{padding:9px 12px;text-align:right;border-bottom:1px solid var(--rule-soft);font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;color:var(--ink)}
+table.data-table tbody td:first-child{text-align:left;font-family:'Spectral',serif;font-size:14px;color:var(--ink);white-space:nowrap;max-width:240px;font-weight:500}
+table.data-table tbody tr:hover td{background:var(--paper-2)}
+table.data-table tbody td.lim-col{font-family:'Spectral',serif;font-style:italic;font-size:12px;color:var(--muted);text-align:left;white-space:normal;max-width:200px}
+.cell-pos{color:var(--green)}
+.cell-neg{color:var(--red)}
+.cell-warn{color:var(--gold)}
+.cell-steel{color:var(--steel)}
+.cell-nd{color:var(--rule)}
+.td-rel{position:relative}
+.td-rel .td-tip{display:none;position:absolute;bottom:calc(100% + 4px);right:0;background:var(--ink);color:var(--paper);padding:10px 12px;width:280px;font-family:'PT Sans',sans-serif;font-size:11.5px;line-height:1.5;text-align:left;z-index:60;font-style:normal;white-space:normal;font-variant-numeric:normal;font-weight:400}
+.td-rel:hover .td-tip{display:block}
+.ctx-mark{display:inline-block;color:var(--ink-2);font-family:'Spectral',serif;font-style:italic;margin-left:3px;font-size:11px;font-weight:400;cursor:help}
+
+.export-btn{background:transparent;border:1px solid var(--ink);color:var(--ink);padding:8px 16px;font-family:'PT Sans',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;cursor:pointer;margin-bottom:14px;transition:background .15s,color .15s}
+.export-btn:hover{background:var(--ink);color:var(--paper)}
+.export-btn .arrow{margin-right:6px;font-family:'JetBrains Mono',monospace}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+footer.colophon{margin-top:60px;padding:28px 0 40px;border-top:3px double var(--ink);font-size:12px;color:var(--ink-2);line-height:1.65;font-family:'Spectral',serif}
+.colophon-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:36px}
+@media(max-width:760px){.colophon-grid{grid-template-columns:1fr;gap:18px}}
+.colophon h4{font-family:'PT Sans',sans-serif;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);font-weight:700;margin-bottom:8px}
+.colophon a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--rule)}
+.colophon a:hover{border-bottom-color:var(--ink)}
+.colophon ul{list-style:none}
+.colophon li{padding:2px 0}
+.colophon-aside{font-style:italic;color:var(--muted);font-size:11.5px;margin-top:14px;padding-top:14px;border-top:1px solid var(--rule)}
+
+/* ========================================
+   RESPONSIVE TYPOG
+   ======================================== */
+@media(max-width:520px){
+  .datum-value{font-size:22px}
+  .section-title{font-size:18px}
+  .controls{gap:10px}
+  .status-line{gap:14px;font-size:12px}
+}
+
+/* ========================================
+   AI CALLOUT — agente inteligente
+   ======================================== */
+.ai-callout{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:24px;background:linear-gradient(135deg,#1c1814 0%,#1f2837 60%,#1c2a24 100%);color:var(--paper);padding:22px 28px 22px 30px;margin:28px 0;border:1px solid var(--ink);position:relative;overflow:hidden}
+.ai-callout::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#4285f4 0%,#9b72cb 50%,#34a853 100%)}
+.ai-callout::after{content:'';position:absolute;right:-60px;top:-60px;width:220px;height:220px;background:radial-gradient(circle at center,rgba(66,133,244,.18) 0%,transparent 70%);pointer-events:none}
+.ai-icon{width:52px;height:52px;display:grid;place-items:center;background:rgba(122,173,255,.08);border:1px solid rgba(122,173,255,.25);position:relative;z-index:1}
+.ai-icon svg{width:26px;height:26px}
+.ai-body{position:relative;z-index:1}
+.ai-eyebrow{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#7aadff;font-weight:700;margin-bottom:4px;display:inline-flex;align-items:center;gap:8px}
+.ai-eyebrow .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#34a853;box-shadow:0 0 0 3px rgba(52,168,83,.25);animation:liveBlink 2s ease-in-out infinite}
+@keyframes liveBlink{0%,100%{opacity:1}50%{opacity:.4}}
+.ai-title{font-family:'Spectral',serif;font-size:22px;font-weight:600;line-height:1.2;margin-bottom:6px;color:var(--paper)}
+.ai-sub{font-family:'Spectral',serif;font-style:italic;font-size:13.5px;color:#c8c1b3;line-height:1.55;max-width:62ch}
+.ai-cta{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#4285f4 0%,#34a853 100%);color:#fff;padding:13px 22px;font-family:'PT Sans',sans-serif;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;text-decoration:none;white-space:nowrap;transition:transform .15s,box-shadow .15s;position:relative;z-index:1;box-shadow:0 2px 12px rgba(66,133,244,.25)}
+.ai-cta:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(66,133,244,.4)}
+.ai-cta .arr{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:14px}
+@media(max-width:760px){.ai-callout{grid-template-columns:1fr;gap:16px;padding:22px}.ai-icon{display:none}}
+
+/* small chart legend */
+.legend-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px;font-size:11px}
+.legend-item{display:inline-flex;align-items:center;gap:6px;color:var(--ink-2)}
+.legend-item .sq{display:inline-block;width:10px;height:10px}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <header class="masthead">
+    <div class="kicker">
+      Estado do Rio Grande do Sul <span class="sep">·</span> Secretaria da Fazenda <span class="sep">·</span> Contadoria e Auditoria-Geral
+    </div>
+    <div class="masthead-row">
+      <h1 class="title serif">Painel Fiscal</h1>
+      <div class="edition">
+        <span class="ed-line">Síntese dos <em class="ed-em">Relatórios de Transparência Fiscal</em></span>
+        <span class="ed-line">Edições 1ª a 19ª · Exercícios <span class="mono">2019 – 2025</span></span>
+      </div>
+    </div>
+  </header>
+
+  <div class="controls">
+    <div>
+      <span class="years-label">Exercício em análise</span>
+      <div class="years" id="yearPills"></div>
+    </div>
+    <div class="status-line" id="statusPills"></div>
+  </div>
+
+  <nav class="sections" id="sectionNav">
+    <button class="sec-btn active" data-tab="visao"><span class="sec-num">I</span>Visão geral</button>
+    <button class="sec-btn" data-tab="resultados"><span class="sec-num">II</span>Resultados fiscais</button>
+    <button class="sec-btn" data-tab="conformidade"><span class="sec-num">III</span>Conformidade legal</button>
+    <button class="sec-btn" data-tab="despesas"><span class="sec-num">IV</span>Despesas</button>
+    <button class="sec-btn" data-tab="previdencia"><span class="sec-num">V</span>Previdência &amp; dívida</button>
+    <button class="sec-btn" data-tab="tabela"><span class="sec-num">VI</span>Tabela comparativa</button>
+  </nav>
+
+  <main>
+    <div id="tab-visao" class="tab-pane active"></div>
+    <div id="tab-resultados" class="tab-pane"></div>
+    <div id="tab-conformidade" class="tab-pane"></div>
+    <div id="tab-despesas" class="tab-pane"></div>
+    <div id="tab-previdencia" class="tab-pane"></div>
+    <div id="tab-tabela" class="tab-pane"></div>
+  </main>
+
+  <footer class="colophon">
+    <div class="colophon-grid">
+      <div>
+        <h4>Sobre este painel</h4>
+        Síntese visual e comparativa dos Relatórios de Transparência Fiscal publicados pela <strong>SEFAZ-RS</strong> entre dezembro de 2019 e dezembro de 2025. Os indicadores aqui exibidos foram extraídos das edições oficiais (1ª a 19ª) do RTF. Os dados são públicos; eventuais divergências de arredondamento entre o painel e os relatórios originais devem ser dirimidas pelas fontes primárias.
+        <div class="colophon-aside">Este é um painel síntese, não substitui a leitura dos relatórios oficiais.</div>
+      </div>
+      <div>
+        <h4>Fontes primárias</h4>
+        <ul>
+          <li><a href="https://fazenda.rs.gov.br/relatorio-de-transparencia-fiscal-6852cdcad9e3d" target="_blank" rel="noopener">RTF — Portal SEFAZ-RS</a></li>
+          <li><a href="https://cage.fazenda.rs.gov.br/" target="_blank" rel="noopener">CAGE — Contadoria e Auditoria-Geral</a></li>
+          <li><a href="https://transparencia.rs.gov.br/" target="_blank" rel="noopener">Portal da Transparência RS</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Consulta documental</h4>
+        <ul>
+          <li>Relatórios indexados: 1ª, 4ª, 7ª, 10ª, 13ª, 16ª e 19ª edições (dezembro de cada exercício).</li>
+          <li>Para pesquisa em texto integral dos RTFs, consulte a <a href="https://notebooklm.google.com/notebook/fab925c0-e810-4540-93d8-787a14f35f8d?pli=1" target="_blank" rel="noopener">base documental indexada</a>.</li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+/* =========================================================
+   DADOS — preservados na íntegra do original
+   ========================================================= */
+const ANOS = [2019,2020,2021,2022,2023,2024,2025];
+
+const DATA = {
+  res_prim_meta:    [null, -701.0, -2100.0, 1600.0, -2250.0, -4411.9, -362.5],
+  res_prim_real:    [669.4, 2864.9, 4657.9, 1352.2, 2483.8, 1734.1, -1989.5],
+  res_orc_normal:   [-3433.0, -597.0, 2546.3, 3340.4, 3617.8, 622.4, 2667.3],
+  res_orc_ajustado: [null, null, null, null, -7244.0, -6762.0, -4751.0],
+  rcl:              [39779.0, 42074.0, 53880.0, 50634.0, 56639.0, 60044.0, 65233.0],
+  pessoal_pct:      [45.60, 42.49, 41.37, 47.88, 45.03, 43.72, 44.16],
+  art167a:          [null, null, null, 92.95, 93.27, 90.62, 91.98],
+  deficit_prev:     [-12467.0, -10347.0, -9013.0, -9296.0, -9703.0, -9758.0, -10148.0],
+  funrigs:          [null, null, null, null, null, 1908.0, 4290.0],
+  icms:             [36531.0, 36380.0, 47560.1, 43382.2, 44865.0, 50844.0, 53954.7],
+  desp_pessoal:     [31160.0, 30487.0, 31125.0, 49591.9, 53159.5, 36978.0, 41236.1],
+  desp_odc:         [11280.0, 12050.0, 13623.0, 15605.4, 17774.5, 20095.8, 22411.0],
+  desp_invest:      [837.4, 864.3, 2300.7, 3424.0, 2975.2, 4949.0, 5359.8],
+  saude_pct:        [12.14, 12.14, 12.19, 12.99, 12.17, 13.05, 12.53],
+  educ_pct:         [27.32, 28.12, 25.77, 28.65, 28.65, 27.78, 29.58],
+  divida_saldo:     [null, null, 73.72, 82.47, 92.88, 100.24, 106.54],
+  pag_divida:       [0.0, 0.0, 926.0, 0.0, 2000.0, 1170.0, 0.0]
+};
+
+const CONTEXTO = {
+  res_prim_real: {
+    2020: ["Superávit de R$ 2,9 bi resulta de reformas estruturais de 2019-20, controle de despesas e suporte financeiro da União (pandemia).", "Queda nominal das despesas de pessoal pela primeira vez em mais de uma década."],
+    2021: ["Maior superávit primário da série histórica: recuperação econômica pós-pandemia e ICMS recorde.", "Pagamento do 13º salário em dia pela primeira vez em seis anos."],
+    2022: ["Queda acentuada após a LC 194/2022, que reduziu alíquotas de ICMS para combustíveis, energia e comunicações.", "Reajustes salariais ao funcionalismo (revisão geral e piso nacional do magistério)."],
+    2023: ["Privatização da CORSAN (cerca de R$ 4 bi) impulsiona receitas; retomada parcial dos pagamentos da dívida no âmbito do RRF.", "ICMS segue pressionado pelos impactos residuais da LC 194/2022."],
+    2024: ["Enchentes de maio/2024 geraram despesas extraordinárias; suspensão da dívida pela LC 206/2024.", "Resultado primário positivo a despeito da calamidade."],
+    2025: ["Déficit primário de R$ 2,0 bi: despesas do FUNRIGS (R$ 4,3 bi para reconstrução) pesam no resultado primário.", "Resultado orçamentário positivo (R$ 2,7 bi) distante do primário por diferenças metodológicas."]
+  },
+  res_orc_ajustado: {
+    2019: ["Déficit estrutural reflete período anterior às reformas fiscais de 2019."],
+    2021: ["Melhora estrutural: reformas administrativa (EC 78/2020) e previdenciária (EC 103/2019) começam a produzir efeitos."],
+    2023: ["Resultado ajustado muito negativo (−R$ 7,2 bi) apesar do publicado positivo: privatização da CORSAN excluída no ajuste.", "LC 194/2022 reduziu base tributária permanente do ICMS."],
+    2024: ["LC 206/2024: suspensão da dívida com a União melhora resultado publicado mas piora ajustado (R$ 4,3 bi excluídos).", "Enchentes geram despesas FUNRIGS de R$ 1,9 bi excluídas do ajustado."],
+    2025: ["Resultado ajustado de −R$ 4,75 bi: suspensão da dívida (R$ 4,3 bi), Refaz Reconstrução e rendimentos SIAC excluídos.", "Demonstra que a sustentabilidade estrutural ainda exige atenção."]
+  },
+  res_orc_normal: {
+    2021: ["Primeiro superávit orçamentário desde o início do RRF."],
+    2022: ["Superávit impulsionado pela privatização da Sulgás (R$ 955 mi) e compensação pela LC 194."],
+    2023: ["Privatização da CORSAN contabilizada eleva o resultado publicado; impacto aproximado de R$ 4 bi."],
+    2024: ["Enchentes e gastos de reconstrução; resultado publicado positivo, mas modesto."],
+    2025: ["Quinto superávit consecutivo; impulsionado por Refaz Reconstrução, suspensão da dívida e Pró-Sustentabilidade BID."]
+  },
+  rcl: {
+    2022: ["RCL cai 6% em relação a 2021 pelo impacto da LC 194/2022 (queda do ICMS sobre combustíveis, energia e comunicações)."],
+    2023: ["Recuperação parcial após a queda de 2022."],
+    2024: ["Crescimento impulsionado pela recuperação econômica pós-enchentes e retomada de atividades."],
+    2025: ["RCL de R$ 65,2 bi (+8,6%): crescimento nominal sustentado por Refaz Reconstrução e receitas patrimoniais."]
+  },
+  pessoal_pct: {
+    2019: ["45,60% — acima do limite prudencial vigente; o RS ainda não aderira ao RRF."],
+    2022: ["Alta para 47,88% reflete reajustes do funcionalismo (revisão geral 2022 e piso nacional do magistério).", "Mais próximo do limite máximo (49%); RCL caiu com a LC 194/2022."],
+    2023: ["Queda para 45,03% após crescimento de 2022; reformas e controle de despesas produzem efeito."],
+    2025: ["44,16% — reestruturação de carreiras aprovadas em 2024 eleva despesas, mas RCL maior compensa."]
+  },
+  art167a: {
+    2022: ["Primeiro ano de apuração publicada no RTF; 92,95% — abaixo do limite de 95%."],
+    2024: ["Queda para 90,62%: melhor resultado da série, evidencia equilíbrio entre receitas e despesas correntes."],
+    2025: ["91,98% — alta vs 2024 reflete crescimento das despesas correntes com pessoal e FUNRIGS."]
+  },
+  deficit_prev: {
+    2019: ["Pior déficit da série: R$ 12,5 bi — antes das reformas previdenciárias."],
+    2020: ["Queda de 17% (R$ 2,1 bi): EC 103/2019 e LC Estadual 15.429/2019 começam a produzir efeitos.", "Primeira queda nominal do déficit do Fundo Financeiro desde 2010."],
+    2021: ["Menor déficit da série: R$ 9,0 bi — efeito combinado das reformas federal (EC 103) e estadual (LC 15.429/2019, EC 78/2020)."],
+    2025: ["Alta em relação a 2024: atualização das tabelas previdenciárias incorporando elevação de 7,5% dos benefícios vinculados ao piso nacional."]
+  },
+  funrigs: {
+    2024: ["Criado pela LC 206/2024 após enchentes de maio/2024; R$ 1,9 bi referem-se à parcela de jun-dez/2024 da dívida suspensa."],
+    2025: ["R$ 4,3 bi transferidos ao FUNRIGS em 2025 (parcelas da dívida que seriam pagas à União); R$ 6,7 bi acumulados desde jun/2024."]
+  },
+  icms: {
+    2021: ["Recorde histórico: recuperação econômica pós-pandemia e inflação elevada (IPCA +10,06%).", "Em termos reais (IPCA), arrecadação de R$ 58,0 bi — pico da série."],
+    2022: ["Queda de 8,8% nominal: LC 194/2022 reduziu alíquotas de combustíveis, energia e comunicações para 17% a partir de jul/2022."],
+    2024: ["Crescimento de 13,3% nominal impulsionado pela recuperação pós-enchentes e medidas compensatórias."],
+    2025: ["R$ 53,9 bi nominal (+6%): inclui R$ 2,0 bi extraordinários do Refaz Reconstrução I e II.", "Descontando o Refaz, a arrecadação real caiu 2,8% — ainda não recuperada dos impactos da LC 194/2022."]
+  },
+  desp_pessoal: {
+    2022: ["Alta expressiva por reajustes do funcionalismo e incorporação de reajustes do magistério; critério de empenho inclui RAPs."],
+    2024: ["Queda nominal vs 2023: mudança metodológica para o critério liquidado a partir de 2023."],
+    2025: ["Alta de 12% nominal: reestruturação de carreiras aprovadas em 2024 com vigência a partir de jan/2025 e precatórios de pessoal."]
+  },
+  desp_invest: {
+    2021: ["Salto expressivo de investimentos: pagamento de dívidas em atraso e retomada de obras no âmbito do RRF."],
+    2022: ["Privatização da Corsan contribui para recursos de investimento."],
+    2024: ["Aumento expressivo por obras de reconstrução pós-enchentes de maio/2024."],
+    2025: ["R$ 5,4 bi: crescimento de 8%; principal fonte são recursos do FUNRIGS (R$ 2,5 bi) e Avançar-CORSAN (R$ 199 mi)."]
+  },
+  divida_saldo: {
+    2021: ["Primeiro ano com saldo publicado no RTF; crescimento por postergação de parcelas no âmbito do RRF."],
+    2024: ["R$ 100,2 bi: LC 206/2024 substituiu CAM pelo IPCA — reduziu R$ 7,4 bi no saldo efetivo vs encargos originais."],
+    2025: ["R$ 106,5 bi (+6,3%): atualização pelo IPCA (LC 206/2024); sem a mudança de encargo, seria R$ 10,1 bi mais alto."]
+  },
+  pag_divida: {
+    2021: ["Retomada parcial dos pagamentos no âmbito do RRF após suspensão desde 2017."],
+    2023: ["R$ 2,0 bi: retomada significativa dos pagamentos conforme Plano de Recuperação Fiscal."],
+    2024: ["R$ 1,17 bi: pagamentos suspensos pela LC 206/2024 a partir de jun/2024 (pós-enchentes); valores destinados ao FUNRIGS."],
+    2025: ["Zero: suspensão total dos pagamentos em 2025 pela LC 206/2024; R$ 4,3 bi desviados ao FUNRIGS."]
+  },
+  saude_pct: {
+    2025: ["12,53% com critério metodológico anterior; acordo com MP/STF (ago/2025) definiu transição: meta de 9,83% em 2025 excluindo despesas controversas — atingido (9,84%)."]
+  },
+  educ_pct: {
+    2025: ["29,58% com critério anterior; acordo com MP estabelece transição: meta de 18,34% em 2025 excluindo controversas — atingido (20,66%)."]
+  }
+};
+
+const TOOLTIPS = {
+  res_prim_real: 'Resultado Primário: diferença entre receitas e despesas primárias. Exclui financeiras e RPPS. Mede a capacidade de amortizar a dívida.',
+  res_prim_meta: 'Meta do Resultado Primário: valor estabelecido na LDO/LOA vigente para o exercício.',
+  res_orc_normal: 'Resultado Orçamentário publicado: diferença total entre receitas e despesas orçamentárias, excluídas as intraorçamentárias.',
+  res_orc_ajustado: 'Resultado Orçamentário Ajustado: exclui serviço da dívida suspenso (RRF/LC 206), receitas extraordinárias (REFAZ, SIAC) e despesas FUNRIGS.',
+  rcl: 'RCL: Receita Corrente Líquida. Base de cálculo dos limites da LRF. Inclui os últimos 12 meses.',
+  pessoal_pct: 'Despesa de Pessoal / RCL — Poder Executivo. Limite LRF: 49%. Limite prudencial: 46,55%. Acima de 49% veda novas admissões e promoções.',
+  art167a: 'Art. 167-A CF/88: Despesas Correntes / Receitas Correntes. Acima de 95% veda novas operações de crédito e concessão de garantias.',
+  deficit_prev: 'Déficit Previdenciário: resultado negativo do IPE Prev (RPPS do RS) — Fundo Financeiro (repartição simples).',
+  funrigs: 'FUNRIGS: recursos da suspensão da dívida com a União (LC 206/2024) destinados à reconstrução pós-enchentes de 2024.',
+  icms: 'ICMS: principal imposto estadual. Arrecadação nominal bruta anual.',
+  desp_pessoal: 'Despesa de Pessoal: total empenhado, incluindo ativos, inativos, pensionistas e encargos.',
+  desp_odc: 'Outras Despesas Correntes: custeio total empenhado, excluindo pessoal e dívida.',
+  desp_invest: 'Despesas de Investimentos: total empenhado em obras e equipamentos.',
+  saude_pct: 'Saúde (ASPS): % da RLIT aplicado em Ações e Serviços Públicos de Saúde. Mínimo constitucional: 12%.',
+  educ_pct: 'Educação (MDE): % da RLIT aplicado em Manutenção e Desenvolvimento do Ensino. Mínimo constitucional: 25%.',
+  divida_saldo: 'Estoque da Dívida com a União: saldo devedor do principal contrato de dívida. Crescimento reduzido pela LC 206/2024 (IPCA em vez de CAM).',
+  pag_divida: 'Pagamento do Serviço da Dívida: amortização e juros efetivamente pagos no ano. Zerado/reduzido em vários anos por suspensão no RRF e LC 206/2024.'
+};
+
+let selectedYear = 2025;
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+function getIdx(year){ return ANOS.indexOf(year); }
+function fmtNum(v, decimals){
+  const abs = Math.abs(v);
+  const [intPart, decPart] = abs.toFixed(decimals).split('.');
+  const intFmt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  return (v<0?'−':'') + intFmt + (decPart ? ','+decPart : '');
+}
+function fmtBi(v, decimals=2){
+  if(v===null||v===undefined) return 'n/d';
+  return 'R$ ' + fmtNum(v/1000, decimals) + ' bi';
+}
+function fmtMi(v, decimals=0){
+  if(v===null||v===undefined) return 'n/d';
+  return 'R$ ' + fmtNum(v, decimals) + ' mi';
+}
+function fmtPct(v){
+  if(v===null||v===undefined) return 'n/d';
+  return v.toFixed(2).replace('.',',') + '%';
+}
+
+function getValueColor(key, v){
+  if(v===null||v===undefined) return 'ink';
+  if(key==='res_prim_real') return v>0?'pos':'neg';
+  if(key==='res_orc_normal') return v>0?'pos':'neg';
+  if(key==='res_orc_ajustado'){
+    if(v>0) return 'pos';
+    if(v>=-2000) return 'gold';
+    return 'neg';
+  }
+  if(key==='pessoal_pct'){
+    if(v>=49) return 'neg';
+    if(v>=46.55) return 'gold';
+    return 'pos';
+  }
+  if(key==='art167a'){
+    if(v>=95) return 'neg';
+    if(v>=90) return 'gold';
+    return 'pos';
+  }
+  if(key==='saude_pct') return v>=12?'pos':'neg';
+  if(key==='educ_pct') return v>=25?'pos':'neg';
+  if(key==='deficit_prev') return 'neg';
+  if(key==='divida_saldo') return 'steel';
+  if(key==='rcl'||key==='icms') return 'steel';
+  return 'ink';
+}
+
+function statusFor(key, v){
+  // returns {sq, label} or null
+  if(v===null||v===undefined) return null;
+  if(key==='res_prim_real') return v>0?{sq:'green',label:'Superávit'}:{sq:'red',label:'Déficit'};
+  if(key==='res_orc_normal') return v>0?{sq:'green',label:'Superávit'}:{sq:'red',label:'Déficit'};
+  if(key==='res_orc_ajustado'){
+    if(v>0) return {sq:'green',label:'Superávit ajustado'};
+    if(v>=-2000) return {sq:'gold',label:'Déficit moderado'};
+    return {sq:'red',label:'Déficit elevado'};
+  }
+  if(key==='pessoal_pct'){
+    if(v>=49) return {sq:'red',label:'Acima do limite'};
+    if(v>=46.55) return {sq:'gold',label:'Zona prudencial'};
+    return {sq:'green',label:'Dentro do limite'};
+  }
+  if(key==='art167a'){
+    if(v>=95) return {sq:'red',label:'Acima de 95%'};
+    if(v>=90) return {sq:'gold',label:'Atenção'};
+    return {sq:'green',label:'Dentro do limite'};
+  }
+  if(key==='saude_pct') return v>=12?{sq:'green',label:'Mínimo cumprido'}:{sq:'red',label:'Abaixo do mínimo'};
+  if(key==='educ_pct') return v>=25?{sq:'green',label:'Mínimo cumprido'}:{sq:'red',label:'Abaixo do mínimo'};
+  return null;
+}
+
+/* =========================================================
+   CHART DEFAULTS
+   ========================================================= */
+Chart.defaults.color = '#4a4239';
+Chart.defaults.borderColor = 'rgba(28,24,20,.07)';
+Chart.defaults.font.family = "'PT Sans', sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.plugins.tooltip.titleFont = {family:"'JetBrains Mono', monospace", size:12, weight:'600'};
+Chart.defaults.plugins.tooltip.bodyFont = {family:"'PT Sans', sans-serif", size:12};
+Chart.defaults.plugins.tooltip.padding = 12;
+Chart.defaults.plugins.tooltip.backgroundColor = '#1c1814';
+Chart.defaults.plugins.tooltip.titleColor = '#f1ecdf';
+Chart.defaults.plugins.tooltip.bodyColor = '#ebe4d1';
+Chart.defaults.plugins.tooltip.borderColor = '#1c1814';
+Chart.defaults.plugins.tooltip.borderWidth = 0;
+Chart.defaults.plugins.tooltip.cornerRadius = 0;
+Chart.defaults.plugins.tooltip.displayColors = false;
+
+const CHART_INK = '#1c1814';
+const CHART_GREEN = '#3a6b3e';
+const CHART_GOLD = '#a37714';
+const CHART_RED = '#92302a';
+const CHART_STEEL = '#2f4e74';
+const CHART_GRID = 'rgba(28,24,20,.08)';
+const CHART_MUTED = '#857a68';
+
+function makeTooltipFmt(key, kind){
+  // kind: 'bi', 'mi', 'pct'
+  return {
+    callbacks:{
+      title(items){
+        const ano = ANOS[items[0].dataIndex];
+        return String(ano);
+      },
+      label(ctx){
+        const v = ctx.parsed.y;
+        let s;
+        if(v===null||v===undefined) s='n/d';
+        else if(kind==='pct') s = v.toFixed(2).replace('.',',')+'%';
+        else if(kind==='bi') s = 'R$ '+fmtNum(v,2)+' bi';
+        else s = 'R$ '+fmtNum(v,0)+' mi';
+        const datasetLabel = ctx.dataset.label || '';
+        return (datasetLabel ? datasetLabel+': ' : '') + s;
+      },
+      afterBody(items){
+        const ano = ANOS[items[0].dataIndex];
+        const ctx = CONTEXTO[key];
+        if(ctx && ctx[ano] && ctx[ano].length>0){
+          const out = ['', '— Fatores —'];
+          ctx[ano].forEach(f=>out.push('• '+f));
+          return out;
+        }
+        return null;
+      }
+    }
+  };
+}
+
+const chartInstances = {};
+function destroyChart(id){ if(chartInstances[id]){ chartInstances[id].destroy(); delete chartInstances[id]; } }
+function newChart(id, config){
+  destroyChart(id);
+  const c = document.getElementById(id);
+  if(!c) return;
+  // common style adjustments
+  config.options = config.options || {};
+  config.options.responsive = true;
+  config.options.maintainAspectRatio = false;
+  chartInstances[id] = new Chart(c, config);
+  return chartInstances[id];
+}
+
+const STD_SCALE = {
+  grid:{color:CHART_GRID, drawTicks:false, lineWidth:1},
+  border:{display:false},
+  ticks:{padding:8, color:CHART_MUTED, font:{size:11}}
+};
+
+/* =========================================================
+   YEAR PILLS / STATUS
+   ========================================================= */
+function buildYearPills(){
+  document.getElementById('yearPills').innerHTML = ANOS.map(y =>
+    `<button class="year ${y===selectedYear?'active':''}" onclick="selectYear(${y})">${y}</button>`
+  ).join('');
+}
+
+function selectYear(y){
+  selectedYear = y;
+  buildYearPills();
+  buildStatusPills();
+  rebuildVisao();
+}
+
+function buildStatusPills(){
+  const i = getIdx(selectedYear);
+  const pes = DATA.pessoal_pct[i];
+  const art = DATA.art167a[i];
+  const prim = DATA.res_prim_real[i];
+
+  let pesSq = 'green';
+  if(pes>=49) pesSq='red';
+  else if(pes>=46.55) pesSq='gold';
+
+  let artSq, artVal;
+  if(art===null){ artSq='steel'; artVal='n/d'; }
+  else { artVal = pes? fmtPct(art):''; if(art>=95) artSq='red'; else if(art>=90) artSq='gold'; else artSq='green'; }
+
+  const primSq = prim>0?'green':'red';
+
+  document.getElementById('statusPills').innerHTML = `
+    <div class="status-item">
+      <span class="st-label">Pessoal/RCL</span>
+      <span class="sq sq-${pesSq}"></span>
+      <span class="st-val">${fmtPct(pes)}</span>
+    </div>
+    <div class="status-item">
+      <span class="st-label">Art. 167-A</span>
+      <span class="sq sq-${artSq}"></span>
+      <span class="st-val">${art===null?'n/d':fmtPct(art)}</span>
+    </div>
+    <div class="status-item">
+      <span class="st-label">Res. primário</span>
+      <span class="sq sq-${primSq}"></span>
+      <span class="st-val">${fmtBi(prim,2)}</span>
+    </div>
+  `;
+}
+
+/* =========================================================
+   NAV
+   ========================================================= */
+document.getElementById('sectionNav').addEventListener('click', e=>{
+  const btn = e.target.closest('.sec-btn');
+  if(!btn) return;
+  const tab = btn.dataset.tab;
+  document.querySelectorAll('.sec-btn').forEach(b=>b.classList.toggle('active', b===btn));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active', p.id==='tab-'+tab));
+  if(tab==='visao') rebuildVisao();
+  if(tab==='resultados') buildResultados();
+  if(tab==='conformidade') buildConformidade();
+  if(tab==='despesas') buildDespesas();
+  if(tab==='previdencia') buildPrevidencia();
+  if(tab==='tabela') buildTabela();
+});
+
+/* =========================================================
+   DATUM CARD
+   ========================================================= */
+function datum(key, label, valueText, sub, valColor, statusObj, tip){
+  const stHtml = statusObj ? `<div class="datum-status"><span class="sq sq-${statusObj.sq}"></span>${statusObj.label}</div>` : '';
+  return `
+    <div class="datum">
+      <div class="datum-label">
+        ${label}
+        ${tip?`<span class="datum-info">i<span class="tip">${tip}</span></span>`:''}
+      </div>
+      <div class="datum-value ${valColor}">${valueText}</div>
+      <div class="datum-sub">${sub}</div>
+      ${stHtml}
+    </div>
+  `;
+}
+
+/* =========================================================
+   ABA I — VISÃO GERAL
+   ========================================================= */
+function rebuildVisao(){
+  buildStatusPills();
+  const y = selectedYear, i = getIdx(y);
+  const el = document.getElementById('tab-visao');
+
+  const cards = [
+    {key:'res_prim_real', label:'Resultado Primário',         value:fmtBi(DATA.res_prim_real[i],2),    sub:`Meta LDO: ${fmtBi(DATA.res_prim_meta[i],2)}`},
+    {key:'res_orc_normal',label:'Result. Orçam. Publicado',   value:fmtBi(DATA.res_orc_normal[i],2),   sub:'Apuração oficial'},
+    {key:'res_orc_ajustado',label:'Result. Orçam. Ajustado',  value:fmtBi(DATA.res_orc_ajustado[i],2), sub:'Excluídos RRF, FUNRIGS e receitas extraord.'},
+    {key:'rcl',           label:'Receita Corrente Líquida',   value:fmtBi(DATA.rcl[i],2),              sub:'RCL ajustada — base LRF'},
+    {key:'pessoal_pct',   label:'Pessoal / RCL — Executivo',  value:fmtPct(DATA.pessoal_pct[i]),       sub:'Limite 49%, prudencial 46,55%'},
+    {key:'art167a',       label:'Art. 167-A (DC / RC)',       value:fmtPct(DATA.art167a[i]),           sub:'Limite constitucional: 95%'},
+    {key:'icms',          label:'ICMS — arrec. nominal',      value:fmtBi(DATA.icms[i],2),             sub:'Principal imposto estadual'},
+    {key:'deficit_prev',  label:'Déficit Previdenciário',     value:fmtBi(DATA.deficit_prev[i],2),     sub:'IPE Prev — Fundo Financeiro'},
+  ];
+
+  const datumHtml = cards.map(c =>
+    datum(c.key, c.label, c.value, c.sub, getValueColor(c.key, DATA[c.key][i]), statusFor(c.key, DATA[c.key][i]), TOOLTIPS[c.key]||'')
+  ).join('');
+
+  el.innerHTML = `
+    <div class="section-head">
+      <div class="section-eyebrow">Indicadores · Exercício ${y}</div>
+      <h2 class="section-title serif">Síntese fiscal do exercício</h2>
+      <div class="section-deck">Oito indicadores-chave que situam a posição financeira do Estado no encerramento do ano. Cores indicam conformidade ou direção do resultado; passe o cursor para fatores explicativos.</div>
+    </div>
+
+    <div class="datum-grid">${datumHtml}</div>
+
+    ${y===2025 ? `
+    <aside class="ai-callout">
+      <div class="ai-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#7aadff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2 L13.5 8.5 L20 10 L13.5 11.5 L12 18 L10.5 11.5 L4 10 L10.5 8.5 Z"/>
+          <path d="M19 16 L19.7 18.3 L22 19 L19.7 19.7 L19 22 L18.3 19.7 L16 19 L18.3 18.3 Z" fill="#7aadff" fill-opacity=".25"/>
+        </svg>
+      </div>
+      <div class="ai-body">
+        <div class="ai-eyebrow"><span class="live-dot"></span>Agente inteligente · Online</div>
+        <div class="ai-title">Consulta Inteligente — RTFs SEFAZ-RS 2019–2025</div>
+        <div class="ai-sub">Quer informações mais detalhadas? Pergunte qualquer coisa sobre os Relatórios de Transparência Fiscal do Rio Grande do Sul à base documental indexada (1ª a 19ª edições).</div>
+      </div>
+      <a class="ai-cta" href="https://notebooklm.google.com/notebook/fab925c0-e810-4540-93d8-787a14f35f8d?pli=1" target="_blank" rel="noopener">
+        Abrir e fazer perguntas <span class="arr">→</span>
+      </a>
+    </aside>
+    ` : ''}
+
+    <div class="section-head">
+      <div class="section-eyebrow">Resultados do exercício</div>
+      <h3 class="section-title serif">Resultados fiscais e composição de despesas</h3>
+    </div>
+
+    <div class="grid-2">
+      <div class="chart-block">
+        <div class="chart-head">
+          <div class="chart-eyebrow">Figura 1 · Em bilhões de reais</div>
+          <div class="chart-title serif">Três medidas de resultado, ${y}</div>
+          <div class="chart-deck">Comparativo entre o resultado primário, o orçamentário publicado e o orçamentário ajustado.</div>
+        </div>
+        <div class="chart-canvas" style="height:230px"><canvas id="chartSnapshot"></canvas></div>
+      </div>
+      <div class="chart-block">
+        <div class="chart-head">
+          <div class="chart-eyebrow">Figura 2 · Em bilhões de reais</div>
+          <div class="chart-title serif">Composição das despesas, ${y}</div>
+          <div class="chart-deck">Distribuição entre pessoal, outras despesas correntes, investimentos e FUNRIGS.</div>
+        </div>
+        <div class="chart-canvas" style="height:230px"><canvas id="chartDonut"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <div class="section-eyebrow">Conformidade · Limites legais</div>
+      <h3 class="section-title serif">Posição dos indicadores frente aos limites</h3>
+      <div class="section-deck">A barra representa a faixa do indicador; marcas verticais indicam limites legais.</div>
+    </div>
+    <div class="limits-block" id="limitsBlock"></div>
+
+    <div class="section-head">
+      <div class="section-eyebrow">Séries históricas · 2019 – 2025</div>
+      <h3 class="section-title serif">ICMS e Receita Corrente Líquida</h3>
+    </div>
+    <div class="grid-2">
+      <div class="chart-block">
+        <div class="chart-head">
+          <div class="chart-eyebrow">Figura 3 · Em bilhões de reais</div>
+          <div class="chart-title serif">ICMS — arrecadação nominal</div>
+          <div class="chart-deck">Série anual. Barra destacada indica o exercício selecionado.</div>
+        </div>
+        <div class="chart-canvas" style="height:220px"><canvas id="chartIcms"></canvas></div>
+        <div class="chart-source">Fonte: RTF / SEFAZ-RS. Valores nominais brutos.</div>
+      </div>
+      <div class="chart-block">
+        <div class="chart-head">
+          <div class="chart-eyebrow">Figura 4 · Em bilhões de reais</div>
+          <div class="chart-title serif">Receita Corrente Líquida</div>
+          <div class="chart-deck">RCL ajustada anual conforme metodologia da LRF.</div>
+        </div>
+        <div class="chart-canvas" style="height:220px"><canvas id="chartRcl"></canvas></div>
+        <div class="chart-source">Fonte: RTF / SEFAZ-RS.</div>
+      </div>
+    </div>
+  `;
+
+  buildLimits(y);
+
+  // Snapshot bars
+  newChart('chartSnapshot', {
+    type:'bar',
+    data:{
+      labels:['Primário','Orçam. publicado','Orçam. ajustado'],
+      datasets:[{
+        data:[
+          DATA.res_prim_real[i]/1000,
+          DATA.res_orc_normal[i]/1000,
+          DATA.res_orc_ajustado[i]===null?null:DATA.res_orc_ajustado[i]/1000
+        ],
+        backgroundColor:[
+          DATA.res_prim_real[i]>=0?CHART_GREEN:CHART_RED,
+          DATA.res_orc_normal[i]>=0?CHART_GREEN:CHART_RED,
+          DATA.res_orc_ajustado[i]===null?CHART_MUTED:(DATA.res_orc_ajustado[i]>=0?CHART_GREEN:CHART_RED)
+        ],
+        borderRadius:0, borderSkipped:false, barPercentage:.65, categoryPercentage:.7
+      }]
+    },
+    options:{
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>'R$ '+fmtNum(c.parsed.y,2)+' bi'}}},
+      scales:{x:{...STD_SCALE, grid:{display:false}}, y:{...STD_SCALE, ticks:{...STD_SCALE.ticks, callback:v=>'R$ '+v.toFixed(1).replace('.',',')+' bi'}}}
+    }
+  });
+
+  // Donut
+  const dp = DATA.desp_pessoal[i], odc = DATA.desp_odc[i], inv = DATA.desp_invest[i], fun = DATA.funrigs[i]||0;
+  const donutData = [{l:'Pessoal',v:dp,c:CHART_RED},{l:'Outras desp. correntes',v:odc,c:CHART_STEEL},{l:'Investimentos',v:inv,c:CHART_GREEN}];
+  if(fun>0) donutData.push({l:'FUNRIGS',v:fun,c:CHART_GOLD});
+  newChart('chartDonut', {
+    type:'doughnut',
+    data:{labels:donutData.map(d=>d.l),datasets:[{data:donutData.map(d=>d.v),backgroundColor:donutData.map(d=>d.c),borderWidth:2,borderColor:'#f1ecdf'}]},
+    options:{
+      cutout:'58%',
+      plugins:{
+        legend:{position:'right',labels:{boxWidth:10,boxHeight:10,padding:10,color:'#1c1814',font:{size:12,family:"'PT Sans',sans-serif"},generateLabels:(chart)=>{
+          const data = chart.data;
+          return data.labels.map((l,i)=>({
+            text: l + '  R$ '+fmtNum(data.datasets[0].data[i]/1000,1)+' bi',
+            fillStyle: data.datasets[0].backgroundColor[i],
+            strokeStyle: data.datasets[0].backgroundColor[i],
+            lineWidth:0,
+            index:i
+          }));
+        }}},
+        tooltip:{callbacks:{label:c=>c.label+': R$ '+fmtNum(c.parsed/1000,2)+' bi'}}
+      }
+    }
+  });
+
+  // ICMS
+  newChart('chartIcms', {
+    type:'bar',
+    data:{labels:ANOS.map(String),datasets:[{label:'ICMS',data:DATA.icms.map(v=>v/1000),backgroundColor:ANOS.map(yy=>yy===y?CHART_STEEL:'rgba(47,78,116,.32)'),borderRadius:0,barPercentage:.7,categoryPercentage:.75}]},
+    options:{plugins:{legend:{display:false},tooltip:makeTooltipFmt('icms','bi')},
+      scales:{x:{...STD_SCALE,grid:{display:false}},y:{...STD_SCALE,ticks:{...STD_SCALE.ticks,callback:v=>'R$ '+v.toFixed(0)+' bi'}}}}
+  });
+
+  // RCL
+  newChart('chartRcl', {
+    type:'line',
+    data:{labels:ANOS.map(String),datasets:[{label:'RCL',data:DATA.rcl.map(v=>v/1000),borderColor:CHART_INK,backgroundColor:'rgba(28,24,20,.06)',fill:true,tension:.18,pointRadius:ANOS.map(yy=>yy===y?5:3),pointBackgroundColor:ANOS.map(yy=>yy===y?CHART_GOLD:CHART_INK),pointBorderWidth:0,borderWidth:1.8}]},
+    options:{plugins:{legend:{display:false},tooltip:makeTooltipFmt('rcl','bi')},
+      scales:{x:{...STD_SCALE,grid:{display:false}},y:{...STD_SCALE,ticks:{...STD_SCALE.ticks,callback:v=>'R$ '+v.toFixed(0)+' bi'}}}}
+  });
+}
+
+function buildLimits(y){
+  const i = getIdx(y);
+  const el = document.getElementById('limitsBlock');
+  if(!el) return;
+
+  const items = [
+    {key:'pessoal_pct', name:'Despesa de Pessoal', cap:'(% da RCL — Executivo)', val:DATA.pessoal_pct[i], max:55, marks:[{at:46.55, label:'46,55%'},{at:49, label:'49%'}]},
+    {key:'art167a',     name:'Despesas / Receitas Correntes', cap:'(Art. 167-A CF/88)', val:DATA.art167a[i], max:100, marks:[{at:90, label:'90%'},{at:95, label:'95%'}]},
+    {key:'saude_pct',   name:'Saúde — ASPS', cap:'(% da RLIT)', val:DATA.saude_pct[i], max:20, marks:[{at:12,label:'12%'}]},
+    {key:'educ_pct',    name:'Educação — MDE', cap:'(% da RLIT)', val:DATA.educ_pct[i], max:35, marks:[{at:25,label:'25%'}]},
+  ];
+
+  el.innerHTML = items.map(it=>{
+    if(it.val===null){
+      return `<div class="limit-row"><div class="limit-name">${it.name}<span class="lim-cap">${it.cap}</span></div><div class="limit-bar"></div><div class="limit-val cell-nd">n/d</div></div>`;
+    }
+    const fillW = Math.min(100, Math.max(0, it.val/it.max*100));
+    const colorClass = getValueColor(it.key, it.val);
+    const colorVal = {pos:CHART_GREEN, gold:CHART_GOLD, neg:CHART_RED, steel:CHART_STEEL, ink:CHART_INK}[colorClass]||CHART_INK;
+    const marks = it.marks.map((m,mi)=>`<div class="limit-marker ${mi%2===1?'below':''}" style="left:${(m.at/it.max)*100}%" data-label="${m.label}"></div>`).join('');
+    return `
+      <div class="limit-row">
+        <div class="limit-name">${it.name}<span class="lim-cap">${it.cap}</span></div>
+        <div class="limit-bar">
+          <div class="limit-fill" style="width:${fillW}%;background:${colorVal}"></div>
+          ${marks}
+        </div>
+        <div class="limit-val" style="color:${colorVal}">${it.val.toFixed(2).replace('.',',')}%</div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* =========================================================
+   ABA II — RESULTADOS FISCAIS
+   ========================================================= */
+function buildResultados(){
+  const el = document.getElementById('tab-resultados');
+  el.innerHTML = `
+    <div class="section-head">
+      <div class="section-eyebrow">Seção II</div>
+      <h2 class="section-title serif">Resultados fiscais · 2019–2025</h2>
+      <div class="section-deck">Comparação entre resultado primário, resultado orçamentário publicado e resultado orçamentário ajustado para expurgos extraordinários.</div>
+    </div>
+
+    <div class="editorial-note">
+      <span class="note-tag">Nota metodológica</span>
+      <strong>Sobre o Resultado Orçamentário Ajustado.</strong> O ajuste exclui o serviço da dívida não executado no âmbito do RRF e da LC 206/2024 (suspensão pós-enchentes), as receitas extraordinárias (REFAZ Reconstrução, rendimentos SIAC de exercícios anteriores, operações de crédito para precatórios) e adiciona as despesas extraordinárias do FUNRIGS. Reflete melhor a situação estrutural das finanças estaduais.
+    </div>
+
+    <div class="grid-2">
+      <div class="chart-block">
+        <div class="chart-head">
+          <div class="chart-eyebrow">Figura 5 · Em bilhões de reais</div>
+          <div class="chart-title serif">Resultado orçamentário: publicado vs ajustado</div>
+        </div>
+        <div class="chart-canvas" style="height:280px"><canvas id="chartOrcBar"></canvas></div>
+        <div class="chart-source">Fonte: RTF / SEFAZ-RS, edições 1ª a 19ª.</div>
+      </div>
+      <div class="chart-block">
+        <div class="chart-head">
+          <div class="chart-eyebrow">Figura 6 · Em bilhões de reais</div>
+          <div class="chart-title serif">Resultado primário: realizado vs meta LDO</div>
+        </div>
+        <div class="chart-canvas" style="height:280px"><canvas id="chartPrimBar"></canvas></div>
+        <div class="chart-source">Fonte: RTF / SEFAZ-RS. Metas anuais da LDO.</div>
+      </div>
+    </div>
+
+    <div class="chart-block" style="margin-top:18px">
+      <div class="chart-head">
+        <div class="chart-eyebrow">Figura 7 · Em bilhões de reais</div>
+        <div class="chart-title serif">Receita Corrente Líquida — série histórica</div>
+        <div class="chart-deck">RCL ajustada conforme a Lei de Responsabilidade Fiscal.</div>
+      </div>
+      <div class="chart-canvas" style="height:220px"><canvas id="chartRclLine"></canvas></div>
+      <div class="chart-source">Fonte: RTF / SEFAZ-RS.</div>
+    </div>
+  `;
+
+  newChart('chartOrcBar',{
+    type:'bar',
+    data:{labels:ANOS.map(String),datasets:[
+      {label:'Publicado',data:DATA.res_orc_normal.map(v=>v/1000),backgroundColor:CHART_STEEL,borderRadius:0,barPercentage:.85,categoryPercentage:.6},
+      {label:'Ajustado',data:DATA.res_orc_ajustado.map(v=>v===null?null:v/1000),backgroundColor:CHART_GOLD,borderRadius:0,barPercentage:.85,categoryPercentage:.6}
+    ]},
+    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,padding:14,font:{size:12}}},tooltip:makeTooltipFmt('res_orc_ajustado','bi')},
+      scales:{x:{...STD_SCALE,grid:{display:false}},y:{...STD_SCALE,ticks:{...STD_SCALE.ticks,callback:v=>'R$ '+v.toFixed(1).replace('.',',')+' bi'}}}}
+  });
+
+  newChart('chartPrimBar',{
+    type:'bar',
+    data:{labels:ANOS.map(String),datasets:[
+      {label:'Realizado',data:DATA.res_prim_real.map(v=>v/1000),backgroundColor:DATA.res_prim_real.map(v=>v>=0?CHART_GREEN:CHART_RED),borderRadius:0,barPercentage:.7,categoryPercentage:.75},
+      {label:'Meta LDO',type:'line',data:DATA.res_prim_meta.map(v=>v===null?null:v/1000),borderColor:CHART_INK,backgroundColor:'transparent',borderDash:[4,4],borderWidth:1.5,pointRadius:3,pointBackgroundColor:CHART_INK,spanGaps:false}
+    ]},
+    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,padding:14,font:{size:12}}},tooltip:makeTooltipFmt('res_prim_real','bi')},
+      scales:{x:{...STD_SCALE,grid:{display:false}},y:{...STD_SCALE,ticks:{...STD_SCALE.ticks,callback:v=>'R$ '+v.toFixed(1).replace('.',',')+' bi'}}}}
+  });
+
+  newChart('chartRclLine',{
+    type:'line',
+    data:{labels:ANOS.map(String),datasets:[{label:'RCL',data:DATA.rcl.map(v=>v/1000),borderColor:CHART_INK,backgroundColor:'rgba(28,24,20,.06)',fill:true,tension:.2,pointRadius:4,pointBackgroundColor:CHART_INK,borderWidth:1.8}]},
+    options:{plugins:{legend:{display:false},tooltip:makeTooltipFmt('rcl','bi')},
+      scales:{x:{...STD_SCALE,grid:{display:false}},y:{...STD_SCALE,ticks:{...STD_SCALE.ticks,callback:v=>'R$ '+v.toFixed(0)+' bi'}}}}
+  });
+}
+
+/* =========================================================
+   ABA III — CONFORMIDADE LEGAL
+   ========================================================= */
+function buildConformidade(){
+  const el = document.getElementById('tab-conformidade');
+  el.innerHTML = `
+    <div class="section-head">
+      <div class="section-eyebrow">Seção III</div>
+      <h2 class="section-title serif">Conformidade legal · 2019–2025</h2>
+      <div class="section-deck">Posição dos principais indicadores da Lei de Responsabilidade Fiscal e da Constituição em relação aos limites legais aplicáveis.</div>
+    </div>
+
+    <div class="section-head" style="margin-top:24px">
+      <div class="section-eyebrow">Lei de Responsabilidade Fiscal</div>
+      <h3 class="section-title serif">Despesa de Pessoal sobre RCL — Poder Executivo</h3>
+    </div>
+    <div class="chart-block">
+      <div class="chart-head">
+        <div class="chart-eyebrow">Figura 8 · Em percentual da RCL</div>
+        <div class="chart-title serif">Pessoal / RCL — série 2019 – 2025</div>
+        <div class="chart-deck">Limites: prudencial 46,55% (linha tracejada âmbar) e máximo da LRF 49% (linha tracejada vermelha).</div>
+      </div>
+      <div class="chart-canvas" style="height:260px"><canvas id="chartPessoalBar"></canvas></div>
+      <div class="chart-source">Fonte: RTF / SEFAZ-RS. Cálculo conforme metodologia da LRF.</div>
+    </div>
+
+    <div class="section-head" style="margin-top:28px">
+      <div class="section-eyebrow">Constituição Federal</div>
+      <h3 class="section-title serif">Art. 167-A — Despesas Correntes sobre Receitas Correntes</h3>
+    </div>
+    <div class="chart-block">
+      <div class="chart-head">
+        <div class="chart-eyebrow">Figura 9 · Em percentual das receitas correntes</div>
+        <div class="chart-title serif">DC / RC — disponível a partir de 2022</div>
+        <div class="chart-deck">Limite constitucional de 95%; zona de atenção a partir de 90%.</div>
+      </div>
+      <div class="chart-canvas" style="height:220px"><canvas id="chartArt167Bar"></canvas></div>
+      <div class="chart-source">Fonte: RTF / SEFAZ-RS. Indicador apurado a partir do exercício de 2022.</div>
+    </div>
+
+    <div class="section-head" style="margin-top:28px">
+      <div class="section-eyebrow">Mínimos constitucionais</div>
+      <h3 class="section-title serif">Saúde e Educação</h3>
+    </div>
+    <div class="grid-2">
+      <div class="chart-block">
+        <div class="chart-head">
+          <div class="chart-eyebrow">Figura 10 · Em percentual da RLIT</div>
+          <div class="chart-title serif">Saúde — ASPS</div>
+          <div class="chart-deck">Mínimo constitucional: 12% da Receita Líquida de Impostos e Transferências.</div>
+        </div>
+        <div class="chart-canvas" style="height:220px"><canvas id="chartSaudeBar"></canvas></div>
+      </div>
+      <div class="chart-block">
+        <div class="chart-head">
+          <div class="chart-eyebrow">Figura 11 · Em percentual da RLIT</div>
+          <div class="chart-title serif">Educação — MDE</div>
+          <div class="chart-deck">Mínimo constitucional: 25% da RLIT.</div>
+        </div>
+        <div class="chart-canvas" style="height:220px"><canvas id="chartEducBar"></canvas></div>
+      </div>
+    </div>
+  `;
+
+  function limitLine(value, color, label){
+    return {type:'line',label,data:ANOS.map(()=>value),borderColor:color,borderWidth:1.2,borderDash:[5,4],pointRadius:0,fill:false};
+  }
+
+  newChart('chartPessoalBar',{
+    type:'bar',
+    data:{labels:ANOS.map(String),datasets:[
+      {label:'Pessoal/RCL',data:DATA.pessoal_pct,backgroundColor:DATA.pessoal_pct.map(v=>v>=49?CHART_RED:v>=46.55?CHART_GOLD:CHART_GREEN),borderRadius:0,barPercentage:.7,categoryPercentage:.75},
+      limitLine(46.55, CHART_GOLD, 'Prudencial 46,55%'),
+      limitLine(49, CHART_RED, 'Limite 49%')
+    ]},
+    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,padding:14,font:{size:12}}},tooltip:makeTooltipFmt('pessoal_pct','pct')},
+      scales:{x:{...STD_SCALE,grid:{display:false}},y:{...STD_SCALE,min:38,max:52,ticks:{...STD_SCALE.ticks,callback:v=>v.toFixed(1).replace('.',',')+'%'}}}}
+  });
+
+  newChart('chartArt167Bar',{
+    type:'bar',
+    data:{labels:ANOS.map(String),datasets:[
+      {label:'DC / RC',data:DATA.art167a,backgroundColor:DATA.art167a.map(v=>v===null?'transparent':v>=95?CHART_RED:v>=90?CHART_GOLD:CHART_GREEN),borderRadius:0,barPercentage:.7,categoryPercentage:.75},
+      limitLine(90, CHART_GOLD, 'Atenção 90%'),
+      limitLine(95, CHART_RED, 'Limite 95%')
+    ]},
+    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,padding:14,font:{size:12}}},tooltip:makeTooltipFmt('art167a','pct')},
+      scales:{x:{...STD_SCALE,grid:{display:false}},y:{...STD_SCALE,min:85,max:98,ticks:{...STD_SCALE.ticks,callback:v=>v.toFixed(1).replace('.',',')+'%'}}}}
+  });
+
+  newChart('chartSaudeBar',{
+    type:'bar',
+    data:{labels:ANOS.map(String),datasets:[
+      {label:'Saúde ASPS',data:DATA.saude_pct,backgroundColor:DATA.saude_pct.map(v=>v>=12?CHART_GREEN:CHART_RED),borderRadius:0,barPercentage:.7,categoryPercentage:.75},
+      limitLine(12, CHART_INK, 'Mínimo 12%')
+    ]},
+    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,padding:14,font:{size:12}}},tooltip:makeTooltipFmt('saude_pct','pct')},
+      scales:{x:{...STD_SCALE,grid:{display:false}},y:{...STD_SCALE,min:10,max:16,ticks:{...STD_SCALE.ticks,callback:v=>v.toFixed(1).replace('.',',')+'%'}}}}
+  });
+
+  newChart('chartEducBar',{
+    type:'bar',
+    data:{labels:ANOS.map(String),datasets:[
+      {label:'Educação MDE',data:DATA.educ_pct,backgroundColor:DATA.educ_pct.map(v=>v>=25?CHART_STEEL:CHART_RED),borderRadius:0,barPercentage:.7,categoryPercentage:.75},
+      limitLine(25, CHART_INK, 'Mínimo 25%')
+    ]},
+    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,padding:14,font:{size:12}}},tooltip:makeTooltipFmt('educ_pct','pct')},
+      scales:{x:{...STD_SCALE,grid:{display:false}},y:{...STD_SCALE,min:22,max:32,ticks:{...STD_SCALE.ticks,callback:v=>v.toFixed(1).replace('.',',')+'%'}}}}
+  });
+}
+
+/* =========================================================
+   ABA IV — DESPESAS
+   ========================================================= */
+function buildDespesas(){
+  const el = document.getElementById('tab-despesas');
+  el.innerHTML = `
+    <div class="section-head">
+      <div class="section-eyebrow">Seção IV</div>
+      <h2 class="section-title serif">Despesas empenhadas · 2019–2025</h2>
+      <div class="section-deck">Composição, evolução do gasto com pessoal e crescimento dos investimentos vis-à-vis o FUNRIGS.</div>
+    </div>
+
+    <div class="chart-block">
+      <div class="chart-head">
+        <div class="chart-eyebrow">Figura 12 · Em bilhões de reais</div>
+        <div class="chart-title serif">Despesas empenhadas — composição</div>
+        <div class="chart-deck">Pessoal, outras despesas correntes, investimentos e FUNRIGS (a partir de 2024).</div>
+      </div>
+      <div class="chart-canvas" style="height:300px"><canvas id="chartDespStack"></canvas></div>
+      <div class="chart-source">Fonte: RTF / SEFAZ-RS. Despesa empenhada — critério liquidado a partir de 2023.</div>
+    </div>
+
+    <div class="grid-2" style="margin-top:18px">
+      <div class="chart-block">
+        <div class="chart-head">
+          <div class="chart-eyebrow">Figura 13 · Em bilhões de reais</div>
+          <div class="chart-title serif">Evolução da despesa de pessoal</div>
+        </div>
+        <div class="chart-canvas" style="height:240px"><canvas id="chartPessoalLine"></canvas></div>
+      </div>
+      <div class="chart-block">
+        <div class="chart-head">
+          <div class="chart-eyebrow">Figura 14 · Em bilhões de reais</div>
+          <div class="chart-title serif">Investimentos vs FUNRIGS</div>
+          <div class="chart-deck">FUNRIGS criado em jun/2024 pela LC 206/2024.</div>
+        </div>
+        <div class="chart-canvas" style="height:240px"><canvas id="chartInvFun"></canvas></div>
+      </div>
+    </div>
+  `;
+
+  newChart('chartDespStack',{
+    type:'bar',
+    data:{labels:ANOS.map(String),datasets:[
+      {label:'Pessoal',data:DATA.desp_pessoal.map(v=>v/1000),backgroundColor:CHART_RED},
+      {label:'Outras desp. correntes',data:DATA.desp_odc.map(v=>v/1000),backgroundColor:CHART_STEEL},
+      {label:'Investimentos',data:DATA.desp_invest.map(v=>v/1000),backgroundColor:CHART_GREEN},
+      {label:'FUNRIGS',data:DATA.funrigs.map(v=>v===null?0:v/1000),backgroundColor:CHART_GOLD}
+    ]},
+    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,padding:14,font:{size:12}}}},
+      scales:{x:{...STD_SCALE,grid:{display:false},stacked:true},y:{...STD_SCALE,stacked:true,ticks:{...STD_SCALE.ticks,callback:v=>'R$ '+v.toFixed(0)+' bi'}}}}
+  });
+
+  newChart('chartPessoalLine',{
+    type:'line',
+    data:{labels:ANOS.map(String),datasets:[{label:'Desp. Pessoal',data:DATA.desp_pessoal.map(v=>v/1000),borderColor:CHART_RED,backgroundColor:'rgba(146,48,42,.10)',fill:true,tension:.2,pointRadius:4,pointBackgroundColor:CHART_RED,borderWidth:1.8}]},
+    options:{plugins:{legend:{display:false},tooltip:makeTooltipFmt('desp_pessoal','bi')},
+      scales:{x:{...STD_SCALE,grid:{display:false}},y:{...STD_SCALE,ticks:{...STD_SCALE.ticks,callback:v=>'R$ '+v.toFixed(0)+' bi'}}}}
+  });
+
+  newChart('chartInvFun',{
+    type:'bar',
+    data:{labels:ANOS.map(String),datasets:[
+      {label:'Investimentos',data:DATA.desp_invest.map(v=>v/1000),backgroundColor:CHART_GREEN,borderRadius:0,barPercentage:.85,categoryPercentage:.6},
+      {label:'FUNRIGS',data:DATA.funrigs.map(v=>v===null?null:v/1000),backgroundColor:CHART_GOLD,borderRadius:0,barPercentage:.85,categoryPercentage:.6}
+    ]},
+    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,padding:14,font:{size:12}}},tooltip:makeTooltipFmt('desp_invest','bi')},
+      scales:{x:{...STD_SCALE,grid:{display:false}},y:{...STD_SCALE,ticks:{...STD_SCALE.ticks,callback:v=>'R$ '+v.toFixed(1).replace('.',',')+' bi'}}}}
+  });
+}
+
+/* =========================================================
+   ABA V — PREVIDÊNCIA & DÍVIDA
+   ========================================================= */
+function buildPrevidencia(){
+  const el = document.getElementById('tab-previdencia');
+  el.innerHTML = `
+    <div class="section-head">
+      <div class="section-eyebrow">Seção V</div>
+      <h2 class="section-title serif">Previdência e dívida com a União · 2019–2025</h2>
+      <div class="section-deck">Trajetória do déficit do IPE Prev (Fundo Financeiro), recursos do FUNRIGS e dinâmica do estoque e dos pagamentos da dívida.</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="chart-block">
+        <div class="chart-head">
+          <div class="chart-eyebrow">Figura 15 · Em bilhões de reais</div>
+          <div class="chart-title serif">Déficit previdenciário — IPE Prev</div>
+          <div class="chart-deck">Fundo Financeiro (regime de repartição simples).</div>
+        </div>
+        <div class="chart-canvas" style="height:260px"><canvas id="chartDefPrev"></canvas></div>
+      </div>
+      <div class="chart-block">
+        <div class="chart-head">
+          <div class="chart-eyebrow">Figura 16 · Em bilhões de reais</div>
+          <div class="chart-title serif">FUNRIGS — recursos do exercício</div>
+          <div class="chart-deck">Disponível a partir de 2024, conforme LC 206/2024.</div>
+        </div>
+        <div class="chart-canvas" style="height:260px"><canvas id="chartFunrigs"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-block" style="margin-top:18px">
+      <div class="chart-head">
+        <div class="chart-eyebrow">Figura 17 · Dois eixos</div>
+        <div class="chart-title serif">Dívida com a União — estoque e pagamentos</div>
+        <div class="chart-deck">Saldo devedor em barras (eixo esquerdo, R$ bi) e pagamento anual em linha âmbar (eixo direito, R$ bi). Disponível a partir de 2021.</div>
+      </div>
+      <div class="chart-canvas" style="height:300px"><canvas id="chartDivida"></canvas></div>
+      <div class="chart-source">Fonte: RTF / SEFAZ-RS. Pagamentos suspensos pela LC 206/2024 a partir de jun/2024.</div>
+    </div>
+  `;
+
+  newChart('chartDefPrev',{
+    type:'bar',
+    data:{labels:ANOS.map(String),datasets:[{label:'Déficit Prev.',data:DATA.deficit_prev.map(v=>Math.abs(v)/1000),backgroundColor:CHART_RED,borderRadius:0,barPercentage:.7,categoryPercentage:.75}]},
+    options:{plugins:{legend:{display:false},tooltip:makeTooltipFmt('deficit_prev','bi')},
+      scales:{x:{...STD_SCALE,grid:{display:false}},y:{...STD_SCALE,ticks:{...STD_SCALE.ticks,callback:v=>'R$ '+v.toFixed(0)+' bi'}}}}
+  });
+
+  newChart('chartFunrigs',{
+    type:'bar',
+    data:{labels:ANOS.map(String),datasets:[{label:'FUNRIGS',data:DATA.funrigs.map(v=>v===null?null:v/1000),backgroundColor:CHART_GOLD,borderRadius:0,barPercentage:.7,categoryPercentage:.75}]},
+    options:{plugins:{legend:{display:false},tooltip:makeTooltipFmt('funrigs','bi')},
+      scales:{x:{...STD_SCALE,grid:{display:false}},y:{...STD_SCALE,ticks:{...STD_SCALE.ticks,callback:v=>'R$ '+v.toFixed(1).replace('.',',')+' bi'}}}}
+  });
+
+  newChart('chartDivida',{
+    type:'bar',
+    data:{labels:ANOS.map(String),datasets:[
+      {label:'Estoque dívida União',data:DATA.divida_saldo,backgroundColor:CHART_STEEL,borderRadius:0,yAxisID:'y',barPercentage:.7,categoryPercentage:.75},
+      {label:'Pagamento anual',type:'line',data:DATA.pag_divida.map(v=>v/1000),borderColor:CHART_GOLD,backgroundColor:'transparent',borderWidth:1.8,pointRadius:5,pointBackgroundColor:CHART_GOLD,yAxisID:'y2'}
+    ]},
+    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,padding:14,font:{size:12}}},
+      tooltip:{callbacks:{
+        title(items){return String(ANOS[items[0].dataIndex])},
+        label(ctx){const v=ctx.parsed.y;if(v===null||v===undefined) return ctx.dataset.label+': n/d';return ctx.dataset.label+': R$ '+fmtNum(v,2)+' bi'},
+        afterBody(items){const ano=ANOS[items[0].dataIndex];const out=[];const ds=items[0].dataset.label||'';const key=ds.includes('Pagamento')?'pag_divida':'divida_saldo';const c=CONTEXTO[key];if(c&&c[ano]&&c[ano].length>0){out.push('','— Fatores —');c[ano].forEach(f=>out.push('• '+f));}return out;}
+      }}},
+      scales:{x:{...STD_SCALE,grid:{display:false}},
+        y:{...STD_SCALE,position:'left',ticks:{...STD_SCALE.ticks,callback:v=>v===null?'n/d':'R$ '+v.toFixed(0)+' bi'}},
+        y2:{...STD_SCALE,grid:{display:false},position:'right',ticks:{...STD_SCALE.ticks,callback:v=>'R$ '+v.toFixed(1).replace('.',',')+' bi'}}}}
+  });
+}
+
+/* =========================================================
+   ABA VI — TABELA COMPARATIVA
+   ========================================================= */
+const ROWS = [
+  {key:'res_prim_meta',   label:'Resultado primário — meta LDO',    fmt:'mi', limit:'LDO/LOA (variável)'},
+  {key:'res_prim_real',   label:'Resultado primário — realizado',   fmt:'mi', limit:'Meta LDO'},
+  {key:'res_orc_normal',  label:'Resultado orçamentário publicado', fmt:'mi', limit:'—'},
+  {key:'res_orc_ajustado',label:'Resultado orçamentário ajustado',  fmt:'mi', limit:'> 0 (equilíbrio estrutural)'},
+  {key:'rcl',             label:'Receita Corrente Líquida',         fmt:'mi', limit:'Base de cálculo da LRF'},
+  {key:'pessoal_pct',     label:'Pessoal / RCL — Executivo',        fmt:'pct',limit:'< 46,55% (prud.) · < 49% (LRF)'},
+  {key:'art167a',         label:'Art. 167-A (DC / RC)',              fmt:'pct',limit:'< 95%'},
+  {key:'deficit_prev',    label:'Déficit previdenciário',           fmt:'mi', limit:'IPE Prev — Fundo Financeiro'},
+  {key:'funrigs',         label:'FUNRIGS',                           fmt:'mi', limit:'Desde jun/2024'},
+  {key:'icms',            label:'ICMS — arrecadação nominal',       fmt:'mi', limit:'Principal imposto estadual'},
+  {key:'desp_pessoal',    label:'Despesa de pessoal',                fmt:'mi', limit:'Pessoal/RCL ≤ 49%'},
+  {key:'desp_odc',        label:'Outras despesas correntes',        fmt:'mi', limit:'Custeio total'},
+  {key:'desp_invest',     label:'Investimentos',                     fmt:'mi', limit:'—'},
+  {key:'saude_pct',       label:'Saúde — ASPS',                      fmt:'pct',limit:'≥ 12% RLIT'},
+  {key:'educ_pct',        label:'Educação — MDE',                    fmt:'pct',limit:'≥ 25% RLIT'},
+  {key:'divida_saldo',    label:'Estoque da dívida com a União',     fmt:'bi', limit:'DCL ≤ 200% RCL'},
+  {key:'pag_divida',      label:'Pagamento da dívida com a União',   fmt:'mi', limit:'RRF · LC 206/2024'},
+];
+
+function cellClass(key, v){
+  if(v===null||v===undefined) return 'cell-nd';
+  const c = getValueColor(key, v);
+  if(c==='pos') return 'cell-pos';
+  if(c==='neg') return 'cell-neg';
+  if(c==='gold') return 'cell-warn';
+  if(c==='steel') return 'cell-steel';
+  return '';
+}
+
+function fmtBiStr(v, decimals=2){
+  return 'R$ ' + fmtNum(v, decimals) + ' bi';
+}
+function cellFmt(key, v, fmt){
+  if(v===null||v===undefined) return '<span class="cell-nd">n/d</span>';
+  if(fmt==='pct') return v.toFixed(2).replace('.',',')+'%';
+  if(fmt==='bi') return fmtBiStr(v);
+  return fmtBiStr(v/1000);
+}
+
+function varPct(key){
+  const v24 = DATA[key][getIdx(2024)];
+  const v25 = DATA[key][getIdx(2025)];
+  if(v24===null||v25===null||v24===0) return '<span class="cell-nd">n/d</span>';
+  const pct = ((v25-v24)/Math.abs(v24))*100;
+  const cls = pct>=0?'cell-pos':'cell-neg';
+  const sign = pct>=0?'+':'−';
+  return `<span class="${cls}">${sign}${Math.abs(pct).toFixed(1).replace('.',',')}%</span>`;
+}
+
+function buildTabela(){
+  const el = document.getElementById('tab-tabela');
+  const thYears = ANOS.map(y=>`<th>${y}</th>`).join('');
+  const rows = ROWS.map(row=>{
+    const cells = ANOS.map((y,i)=>{
+      const v = DATA[row.key][i];
+      const cls = cellClass(row.key, v);
+      const fv = cellFmt(row.key, v, row.fmt);
+      const ctx = CONTEXTO[row.key];
+      const hasCtx = ctx && ctx[y] && ctx[y].length>0;
+      const tipHtml = hasCtx?`<span class="ctx-mark">i</span><span class="td-tip">${ctx[y].map(f=>'· '+f).join('<br>')}</span>`:'';
+      return `<td class="td-rel ${cls}">${fv}${tipHtml}</td>`;
+    }).join('');
+    return `<tr><td>${row.label}</td>${cells}<td>${varPct(row.key)}</td><td class="lim-col">${row.limit}</td></tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="section-head">
+      <div class="section-eyebrow">Seção VI</div>
+      <h2 class="section-title serif">Tabela comparativa — Todos os indicadores</h2>
+      <div class="section-deck">Variação 2024–2025 calculada sobre o valor absoluto do ano anterior. Marcas “i” indicam fatores explicativos (passe o cursor).</div>
+    </div>
+    <button class="export-btn" onclick="exportCsv()"><span class="arrow">↓</span>Exportar planilha (CSV)</button>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Indicador</th>${thYears}<th>Var. 24 → 25</th><th>Limite / referência</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function exportCsv(){
+  const headers = ['Indicador',...ANOS.map(String),'Var 2024-2025','Limite'].join(';');
+  const rows = ROWS.map(row=>{
+    const vals = ANOS.map((_,i)=>{
+      const v = DATA[row.key][i];
+      if(v===null) return 'n/d';
+      if(row.fmt==='pct') return v.toFixed(2).replace('.',',');
+      if(row.fmt==='bi') return v.toFixed(4).replace('.',',');
+      return (v/1000).toFixed(4).replace('.',',');
+    });
+    const v24 = DATA[row.key][getIdx(2024)];
+    const v25 = DATA[row.key][getIdx(2025)];
+    let varStr = 'n/d';
+    if(v24!==null&&v25!==null&&v24!==0){
+      varStr = ((((v25-v24)/Math.abs(v24))*100)).toFixed(1).replace('.',',') + '%';
+    }
+    return [row.label,...vals,varStr,row.limit].join(';');
+  });
+  const csv = [headers,...rows].join('\n');
+  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'painel-fiscal-rs-2019-2025.csv';
+  a.click();
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+buildYearPills();
+buildStatusPills();
+rebuildVisao();
+</script>
+</body>
+</html>
